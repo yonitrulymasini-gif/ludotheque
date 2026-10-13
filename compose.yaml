@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven_cache:/root/.m2
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ludotheque
+      SPRING_DATASOURCE_USERNAME: ludotheque
+      SPRING_DATASOURCE_PASSWORD: ludotheque
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ludotheque
+      POSTGRES_USER: ludotheque
+      POSTGRES_PASSWORD: ludotheque
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ludotheque -d ludotheque"]
+      interval: 3s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  volumes:
+  postgres_data:
+  maven_cache:
